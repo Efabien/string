@@ -2,14 +2,11 @@ package tool
 import (
 	"sort"
 	"strings"
+	"github.com/Efabien/cognitive_types"
 )
 
 type setManipulation func( portion []string, from int, to int, start int)
 type portionManipulation func( portion []string, from int, to int)
-type Knw struct {
-	Texts [][]string
-	Treshold float32
-}
 
 func Levenshtein(str1, str2 string) int {
 	rune1 := []rune(str1)
@@ -82,6 +79,26 @@ func Every(a []string, callback func(b string, index int)bool) bool {
 	return istrue
 }
 
+func Some(a []string, callback func(b string, index int)bool) bool {
+	isFalse := false
+	for i := 0; i < len(a); i++ {
+		isFalse = callback(a[i], i)
+		if isFalse == true {
+			break
+		}
+	}
+	return isFalse
+}
+
+func Filter(input[]string, callback func(item string, index int)bool)(result[]string) {
+	for index, current := range input {
+		if callback(current, index) {
+			result = append(result, current)
+		}
+	}
+	return
+}
+
 func PortionReading(
 	tab []string,
 	interval int,
@@ -126,12 +143,11 @@ func Arrayify(tab []string) (result [][]string) {
 	return
 }
 
-func Precompute(intents map[string]map[string][]string) map[string]Knw{
-	result := make(map[string]Knw)
+func Precompute(intents cognitivetypes.Raw) cognitivetypes.Intents{
+	result := make(cognitivetypes.Intents)
 	for key, value := range intents {
 		for _, content := range value {
-			input := Knw { Texts: Arrayify(content), Treshold: 0.5 }
-			AjustSet(input.Texts)
+			input := cognitivetypes.Intent { Texts: Arrayify(content), Treshold: 0.5 }
 			result[key] = input
 		}
 	}
